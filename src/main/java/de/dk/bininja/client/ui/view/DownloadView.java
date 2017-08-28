@@ -7,6 +7,7 @@ import java.text.DecimalFormat;
 
 import de.dk.bininja.client.model.DownloadMetadata;
 import de.dk.bininja.client.ui.UIController;
+import de.dk.bininja.net.Download;
 import de.dk.bininja.net.DownloadListener;
 import de.dk.bininja.net.DownloadState;
 import de.dk.util.StringUtils;
@@ -64,6 +65,7 @@ public class DownloadView extends Pane implements DownloadListener {
    private int downloadId;
    private final PulseController progressUpdatePulse;
    private MemoryValue loadProgress = new MemoryValue(0);
+   private float loadSpeed = -1;
    private MemoryValue writeProgress = new MemoryValue(0);
    private MemoryValue length;
 
@@ -152,7 +154,7 @@ public class DownloadView extends Pane implements DownloadListener {
    }
 
    @Override
-   public void stateChanged(DownloadState state) {
+   public void stateChanged(DownloadState state, Download download) {
       switch (state) {
       case INITIALIZING:
          setLoadText("Initialisiere...", null);
@@ -169,7 +171,10 @@ public class DownloadView extends Pane implements DownloadListener {
          break;
 
       case COMPLETE:
-         setLoadText("Fertig", Color.color(0.5, 1, 0.5));
+         this.loadSpeed = download.getLoadSpeed();
+         String msg = String.format("Fertig - durchschnittliche Downloadgeschwindigkeit: %s",
+                                    formatSpeed(loadSpeed));
+         setLoadText(msg, Color.color(0.5, 1, 0.5));
          Platform.runLater(this::downloadTerminated);
          break;
 
@@ -184,8 +189,9 @@ public class DownloadView extends Pane implements DownloadListener {
    }
 
    @Override
-   public void loadProgress(double progress, long receivedBytes, long total) {
-      this.loadProgress.setValue(MemoryUnit.BYTE.convertTo(receivedBytes, loadProgress.getUnit()));
+   public void loadProgress(double progress, long receivedBytes, long total, float loadSpeed) {
+      loadProgress.setValue(MemoryUnit.BYTE.convertTo(receivedBytes, loadProgress.getUnit()));
+      this.loadSpeed = loadSpeed;
       progressUpdatePulse.update();
    }
 
@@ -195,19 +201,30 @@ public class DownloadView extends Pane implements DownloadListener {
       progressUpdatePulse.update();
    }
 
+   private String formatSpeed(float bytesPerSecond) {
+      if (bytesPerSecond == -1)
+         return null;
+
+      return new MemoryValue(bytesPerSecond).toString(FORMAT) + "/s";
+   }
+
    private void updateProgress() {
       double progress;
       String writeProgress;
       String loadProgress;
+      String loadSpeed = formatSpeed(this.loadSpeed);
       if (length == null) {
          progress = -1;
-         loadProgress = "Ladefortschritt: " + this.loadProgress.toString(FORMAT) + " loaded";
+         loadProgress = String.format("Ladefortschritt: %s loaded %s",
+                                      this.loadProgress.toString(FORMAT),
+                                      loadSpeed == null ? "" : " at " + loadSpeed);
          writeProgress = "Schreibfortschritt: " + this.writeProgress.toString(FORMAT) + " written";
       } else {
          progress = this.writeProgress.getValue() / length.getValue();
-         loadProgress = String.format("Ladefortschritt: %s/%s",
+         loadProgress = String.format("Ladefortschritt: %s/%s%s",
                                       this.loadProgress.toString(FORMAT),
-                                      length.toString(FORMAT));
+                                      length.toString(FORMAT),
+                                      loadSpeed == null ? "" : " at " + loadSpeed);
 
          writeProgress = String.format("Schreibfortschritt: %s/%s",
                                        this.writeProgress.toString(FORMAT),
