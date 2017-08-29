@@ -4,13 +4,13 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 
 public class FXLauncher extends Application {
-   private static GUI gui;
+   private static GUIAdapter gui;
 
    public FXLauncher() {
 
    }
 
-   public static void start(GUI gui) {
+   public static void start(GUIAdapter gui) {
       if (FXLauncher.gui != null)
          throw new IllegalStateException("FX application already launched.");
 
@@ -21,7 +21,7 @@ public class FXLauncher extends Application {
    @Override
    public void start(Stage window) {
       if (gui == null)
-         throw new IllegalStateException("No gui to set.");
+         throw new IllegalStateException("No gui set.");
 
       gui.start(window);
    }

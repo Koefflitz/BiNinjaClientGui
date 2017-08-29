@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.dk.bininja.client.ui.UIController;
 import de.dk.bininja.net.ConnectionRefusedException;
 import de.dk.util.StringUtils;
@@ -27,7 +30,9 @@ import javafx.scene.shape.Line;
  * @author David Koettlitz
  * <br>Erstellt am 07.08.2017
  */
-public class ClientView extends Pane {
+public class ContentView extends Pane {
+   private static final Logger LOGGER = LoggerFactory.getLogger(ContentView.class);
+
    public static final double MARGIN = 8;
    private static final double TXT_PORT_WIDTH = 64;
 
@@ -45,13 +50,13 @@ public class ClientView extends Pane {
 
    private final Label lblMsg;
 
-   private final UIController listener;
+   private final UIController controller;
 
-   public ClientView(UIController listener, int defaultPort) {
-      this.listener = Objects.requireNonNull(listener);
+   public ContentView(UIController listener, int defaultPort) {
+      this.controller = Objects.requireNonNull(listener);
 
-      setPrefWidth(GUI.WIDTH);
-      setPrefHeight(GUI.HEIGHT);
+      setPrefWidth(GUIAdapter.WIDTH);
+      setPrefHeight(GUIAdapter.HEIGHT);
 
       this.lblServer = new Label("Downloadserver URL");
       this.txtServer = new TextField();
@@ -127,12 +132,12 @@ public class ClientView extends Pane {
    }
 
    private void btnConnectAction(ActionEvent e) {
-      if (listener.activeDownloadCount() > 0) {
+      if (controller.activeDownloadCount() > 0) {
          String msg = "Sie haben bereits eine bestehende Verbindung zu "
-                      + listener.getConnectionAsString()
+                      + controller.getConnectionAsString()
                       + ", über die noch Downloads laufen."
-                      + "Wollen Sie die Verbindung schließen und alle noch nicht abgeschlossenen Downloads "
-                      + "abbrechen?";
+                      + "Wollen Sie die Verbindung schließen und alle "
+                      + "noch nicht abgeschlossenen Downloads abbrechen?";
 
          Alert alert = new Alert(AlertType.WARNING,
                                  msg,
@@ -145,10 +150,11 @@ public class ClientView extends Pane {
             return;
       }
 
+      LOGGER.debug("Connect triggered.");
       String host = txtServer.getText();
       int port = txtPort.getValue();
       try {
-         listener.connect(host, port);
+         controller.connect(host, port);
       } catch (IOException | ConnectionRefusedException ex) {
          showError("Could not connect to " + host + ":" + port + " - " + ex.getMessage());
       }
@@ -172,7 +178,7 @@ public class ClientView extends Pane {
          return;
 
       for (int i = 0; i < 3; i++) {
-         DownloadView dv = new DownloadView(listener);
+         DownloadView dv = new DownloadView(controller);
          downloads.add(dv);
          getChildren().add(dv);
       }

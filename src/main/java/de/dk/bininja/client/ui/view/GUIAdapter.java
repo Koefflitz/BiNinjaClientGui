@@ -21,8 +21,8 @@ import javafx.stage.Stage;
  * @author David Koettlitz
  * <br>Erstellt am 07.08.2017
  */
-public class GUI implements UI {
-   private static final Logger LOGGER = LoggerFactory.getLogger(GUI.class);
+public class GUIAdapter implements UI {
+   private static final Logger LOGGER = LoggerFactory.getLogger(GUIAdapter.class);
 
    private static final String TITLE = "BiNinja Client";
 
@@ -30,19 +30,19 @@ public class GUI implements UI {
    public static final double HEIGHT = 666;
 
    private UIController controller;
-   private ClientView view;
+   private ContentView view;
 
    private Stage window;
 
    private boolean connected;
 
-   public GUI(UIController controller) {
+   public GUIAdapter(UIController controller) {
       this.controller = controller;
    }
 
    public void start(Stage window) {
       this.window = window;
-      this.view = new ClientView(controller, Base64Connection.PORT);
+      this.view = new ContentView(controller, Base64Connection.PORT);
       window.setScene(new Scene(view, WIDTH, HEIGHT));
       window.setTitle(TITLE);
       window.show();
@@ -103,15 +103,6 @@ public class GUI implements UI {
          view.connected();
       else
          view.disconnected();
-   }
-
-   @Override
-   public void prepareDownload(DownloadMetadata metadata) throws IllegalStateException {
-      view.getDownloads().stream()
-                         .filter(dv -> dv.getDownloadId() == metadata.getId())
-                         .findAny()
-                         .orElseThrow(IllegalStateException::new)
-                         .prepare(metadata);
    }
 
    @Override

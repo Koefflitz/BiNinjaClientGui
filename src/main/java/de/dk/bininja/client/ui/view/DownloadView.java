@@ -5,6 +5,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DecimalFormat;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.dk.bininja.client.model.DownloadMetadata;
 import de.dk.bininja.client.ui.UIController;
 import de.dk.bininja.net.Download;
@@ -39,6 +42,8 @@ import javafx.stage.FileChooser;
  * <br>Erstellt am 07.08.2017
  */
 public class DownloadView extends Pane implements DownloadListener {
+   private static final Logger LOGGER = LoggerFactory.getLogger(DownloadView.class);
+
    public static final int HEIGHT = 166;
 
    private static final String FILECHOOSER_TITLE = "Downloadziel wählen";
@@ -60,7 +65,6 @@ public class DownloadView extends Pane implements DownloadListener {
    private ProgressBar progressBar;
    private final Label lblLoadProgress;
    private Label lblWriteProgress;
-
 
    private int downloadId;
    private final PulseController progressUpdatePulse;
@@ -112,29 +116,29 @@ public class DownloadView extends Pane implements DownloadListener {
 
    @Override
    protected void layoutChildren() {
-      lblUrl.setLayoutX(ClientView.MARGIN);
-      lblUrl.setLayoutY(ClientView.MARGIN);
-      txtUrl.setLayoutX(ClientView.MARGIN);
-      txtUrl.setLayoutY(ClientView.MARGIN + lblUrl.getHeight());
-      txtUrl.setPrefWidth(getWidth() - ClientView.MARGIN * 2 - btnDownload.getWidth());
-      btnDownload.setLayoutX(ClientView.MARGIN + txtUrl.getPrefWidth());
+      lblUrl.setLayoutX(ContentView.MARGIN);
+      lblUrl.setLayoutY(ContentView.MARGIN);
+      txtUrl.setLayoutX(ContentView.MARGIN);
+      txtUrl.setLayoutY(ContentView.MARGIN + lblUrl.getHeight());
+      txtUrl.setPrefWidth(getWidth() - ContentView.MARGIN * 2 - btnDownload.getWidth());
+      btnDownload.setLayoutX(ContentView.MARGIN + txtUrl.getPrefWidth());
       btnDownload.setLayoutY(txtUrl.getLayoutY());
 
-      lblTarget.setLayoutX(ClientView.MARGIN);
-      lblTarget.setLayoutY(txtUrl.getLayoutY() + txtUrl.getHeight() + ClientView.MARGIN);
-      txtTarget.setLayoutX(ClientView.MARGIN);
+      lblTarget.setLayoutX(ContentView.MARGIN);
+      lblTarget.setLayoutY(txtUrl.getLayoutY() + txtUrl.getHeight() + ContentView.MARGIN);
+      txtTarget.setLayoutX(ContentView.MARGIN);
       txtTarget.setLayoutY(lblTarget.getLayoutY() + lblTarget.getHeight());
-      txtTarget.setPrefWidth(getWidth() - ClientView.MARGIN * 2 - btnSelectTarget.getWidth());
+      txtTarget.setPrefWidth(getWidth() - ContentView.MARGIN * 2 - btnSelectTarget.getWidth());
       btnSelectTarget.setLayoutX(txtTarget.getLayoutX() + txtTarget.getPrefWidth());
       btnSelectTarget.setLayoutY(txtTarget.getLayoutY());
 
-      progressBar.setLayoutY(txtTarget.getLayoutY() + txtTarget.getHeight() + ClientView.MARGIN);
-      progressBar.setPrefWidth(getWidth() - ClientView.MARGIN * 2);
-      lblLoadProgress.setLayoutX(ClientView.MARGIN);
+      progressBar.setLayoutY(txtTarget.getLayoutY() + txtTarget.getHeight() + ContentView.MARGIN);
+      progressBar.setPrefWidth(getWidth() - ContentView.MARGIN * 2);
+      lblLoadProgress.setLayoutX(ContentView.MARGIN);
       lblLoadProgress.setLayoutY(progressBar.getLayoutY() + progressBar.getHeight());
-      lblWriteProgress.setLayoutX(ClientView.MARGIN);
+      lblWriteProgress.setLayoutX(ContentView.MARGIN);
       lblWriteProgress.setLayoutY(lblLoadProgress.getLayoutY() + lblLoadProgress.getHeight());
-      progressBar.setLayoutX(ClientView.MARGIN);
+      progressBar.setLayoutX(ContentView.MARGIN);
 
       super.layoutChildren();
    }
@@ -146,10 +150,10 @@ public class DownloadView extends Pane implements DownloadListener {
       writeProgress.setValue(0);
       progressBar.setProgress(0);
       progressBar.setVisible(true);
+      lblWriteProgress.setVisible(true);
       this.lblLoadProgress.setText("Initialisiere...");
       lblLoadProgress.setFont(new Font(12));
       lblLoadProgress.setBackground(null);
-
       setLength(metadata.getLength());
    }
 
@@ -184,7 +188,8 @@ public class DownloadView extends Pane implements DownloadListener {
    }
 
    private void downloadTerminated() {
-      getChildren().removeAll(lblWriteProgress, progressBar);
+      progressBar.setVisible(false);
+      lblWriteProgress.setVisible(false);
       btnDownload.setDisable(false);
    }
 
@@ -296,12 +301,13 @@ public class DownloadView extends Pane implements DownloadListener {
          btnDownload.setDisable(false);
          return;
       }
-      Platform.runLater(() -> {
-         DownloadMetadata metadata = new DownloadMetadata(url);
-         this.downloadId = metadata.getId();
-         boolean downloadStarted = controller.requestDownloadFrom(metadata, this);
-         btnDownload.setDisable(downloadStarted);
-      });
+      DownloadMetadata metadata = new DownloadMetadata(url);
+      this.downloadId = metadata.getId();
+      LOGGER.debug("Triggering " + metadata);
+      boolean downloadStarted = controller.requestDownloadFrom(metadata, this);
+      btnDownload.setDisable(downloadStarted);
+      if (downloadStarted)
+         prepare(metadata);
    }
 
    public void show(String format, Object... args) {
