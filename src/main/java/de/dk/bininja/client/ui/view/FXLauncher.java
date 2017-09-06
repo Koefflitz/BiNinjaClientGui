@@ -4,13 +4,13 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 
 public class FXLauncher extends Application {
-   private static GUIAdapter gui;
+   private static FXAdapter gui;
 
    public FXLauncher() {
 
    }
 
-   public static void start(GUIAdapter gui) {
+   public static void start(FXAdapter gui) {
       if (FXLauncher.gui != null)
          throw new IllegalStateException("FX application already launched.");
 

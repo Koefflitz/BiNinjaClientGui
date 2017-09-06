@@ -21,8 +21,8 @@ import javafx.stage.Stage;
  * @author David Koettlitz
  * <br>Erstellt am 07.08.2017
  */
-public class GUIAdapter implements UI {
-   private static final Logger LOGGER = LoggerFactory.getLogger(GUIAdapter.class);
+public class FXAdapter implements UI {
+   private static final Logger LOGGER = LoggerFactory.getLogger(FXAdapter.class);
 
    private static final String TITLE = "BiNinja Client";
 
@@ -36,7 +36,7 @@ public class GUIAdapter implements UI {
 
    private boolean connected;
 
-   public GUIAdapter(UIController controller) {
+   public FXAdapter(UIController controller) {
       this.controller = controller;
    }
 

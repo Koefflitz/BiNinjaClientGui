@@ -55,8 +55,8 @@ public class ContentView extends Pane {
    public ContentView(UIController listener, int defaultPort) {
       this.controller = Objects.requireNonNull(listener);
 
-      setPrefWidth(GUIAdapter.WIDTH);
-      setPrefHeight(GUIAdapter.HEIGHT);
+      setPrefWidth(FXAdapter.WIDTH);
+      setPrefHeight(FXAdapter.HEIGHT);
 
       this.lblServer = new Label("Downloadserver URL");
       this.txtServer = new TextField();
