@@ -20,6 +20,10 @@
          <artifactId>util</artifactId>
       </dependency>
       <dependency>
+         <groupId>de.dk</groupId>
+         <artifactId>fx-utils</artifactId>
+      </dependency>
+      <dependency>
          <groupId>org.slf4j</groupId>
          <artifactId>slf4j-api</artifactId>
       </dependency>

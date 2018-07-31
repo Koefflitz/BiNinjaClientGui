@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 import de.dk.bininja.client.ui.UIController;
 import de.dk.bininja.net.ConnectionRefusedException;
 import de.dk.util.StringUtils;
-import de.dk.util.javafxUtils.NumberTextField;
+import de.dk.fx.NumberTextField;
 import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
